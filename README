@@ -84,6 +84,7 @@ All zip files use Info-Zip's Zip 2.01.
 Also note that the source files will be in Unix format (LF only to end line)
 so unzipping under OS/2, DOS or Win9x/NT/2K/XP  use the -a switch.
 
+If you use Gentoo, an ebuild is provided, which you can add to a local overlay.
 
 Notes on Source Distribution:
 ----------------------------

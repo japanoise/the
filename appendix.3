@@ -1,0 +1,146 @@
+/*man-start*********************************************************************
+
+
+========================================================================
+APPENDIX 3 - POINTER DEVICE SUPPORT IN THE
+========================================================================
+
+This appendix describes the default behaviour of supported pointer devices
+when running THE; usually a mouse.
+
+------
+SYNTAX:
+------
+
+Mouse "keys" have the following syntax:
+
+ +--------------------+----------------------------------------------+
+ | [a-]bcB IN window  |  Description                                 |
+ +--------------------+----------------------------------------------+
+ | [a-]               |is a keyboard modifier, the same as keyboard  |
+ |                    |keys.  The 'a' can be one of S,C or A for     |
+ |                    |SHIFT, CONTROL and ALT respectively. The '-'  |
+ |                    |is mandatory.                                 |
+ | b                  |is the mouse action.  This can be one of P, R,|
+ |                    |C, 2, D or S for PRESS, RELEASE, CLICK,       |
+ |                    |DOUBLE_CLICK, DRAG and SCROLL respectively.   |
+ | c                  |is the mouse button. This can be one of L, R  |
+ |                    |M, U or D for LEFT, RIGHT, MIDDLE, UP or DOWN |
+ |                    | respectively.                                |
+ | d                  |B for BUTTON, W for WHEEL                     |
+ | IN                 |mandatory keyword                             |
+ | window             |the area of the screen in which the mouse     |
+ |                    |event is to take place.  The valid values     |
+ |                    |for this are:                                 |
+ |                    |Filearea, Cmdline, Idline, Arrow, PRefix,     |
+ |                    |STatarea, Divider and * (for all)             |
+ +--------------------+----------------------------------------------+
+
+
+--------
+EXAMPLES:
+--------
+
+ +--------------------+------------------------------------+
+ |   Mouse Event      |  Description                       |
+ +--------------------+------------------------------------+
+ | S-PLB IN PR        | Left mouse button is pressed,      |
+ |                    | while holding down the SHIFT key,  |
+ |                    | and the mouse positioned in the    |
+ |                    | prefix area.                       |
+ |   2RB IN I         | Right mouse button double-clicked  |
+ |                    | in idline.                         |
+ |   SUW IN *         | Scroll Up Wheel in all windows.    |
+ +--------------------+------------------------------------+
+
+
+--------
+DEFAULTS:
+--------
+
+ +------------------------+------------------------------------+
+ | Mouse Event (Win32)    |  Command(s)                        |
+ +------------------------+------------------------------------+
+ |   2LB in FILEAREA      | cursor MOUSE#sos EDIT              |
+ |   2LB in PREFIX        | cursor MOUSE#sos EDIT              |
+ |   CRB in FILEAREA      | cursor MOUSE#sos MAKECURR          |
+ |   CRB in PREFIX        | cursor MOUSE#sos MAKECURR          |
+ |   CLB in CMDLINE       | cursor MOUSE                       |
+ |   CLB in DIVIDER       | screen 1                           |
+ |   CLB in FILEAREA      | cursor MOUSE                       |
+ |   CLB in FILETABS      | tabfile                            |
+ |   CLB in IDLINE        | xedit                              |
+ |   CLB in PREFIX        | cursor MOUSE                       |
+ |   CLB in STATAREA      | status                             |
+ |   CRB in IDLINE        | xedit -                            |
+ | A-PLB in FILEAREA      | backward                           |
+ | A-PRB in FILEAREA      | forward                            |
+ | C-DLB in FILEAREA      | cursor MOUSE#mark BOX              |
+ | C-PLB in FILEAREA      | cursor MOUSE#reset BLOCK#mark BOX  |
+ | C-PRB in FILEAREA      | cursor MOUSE#mark BOX              |
+ | S-DLB in FILEAREA      | cursor MOUSE#mark LINE             |
+ | S-PLB in FILEAREA      | cursor MOUSE#reset BLOCK#mark LINE |
+ | S-PRB in FILEAREA      | cursor MOUSE#mark LINE             |
+ |   SUW in *             | backward 5 lines                   |
+ |   SDW in *             | forward 5 lines                    |
+ |   SLW in *             | left 5                             |
+ |   SRW in *             | right 5                            |
+ +------------------------+------------------------------------+
+
+ +------------------------+------------------------------------+
+ | Mouse Event (X11)      |  Command(s)                        |
+ +------------------------+------------------------------------+
+ |   2LB in FILEAREA      | cursor MOUSE#sos EDIT              |
+ |   2LB in PREFIX        | cursor MOUSE#sos EDIT              |
+ |   CLB in CMDLINE       | cursor MOUSE                       |
+ |   CLB in DIVIDER       | screen 1                           |
+ |   CLB in FILEAREA      | cursor MOUSE                       |
+ |   CLB in IDLINE        | xedit                              |
+ |   CLB in PREFIX        | cursor MOUSE                       |
+ |   CLB in STATAREA      | status                             |
+ |   CRB in FILEAREA      | cursor MOUSE#sos MAKECURR          |
+ |   CRB in IDLINE        | xedit -                            |
+ |   CRB in PREFIX        | cursor MOUSE#sos MAKECURR          |
+ | C-DLB in FILEAREA      | cursor MOUSE#mark BOX              |
+ | C-PLB in FILEAREA      | cursor MOUSE#reset BLOCK#mark BOX  |
+ | C-PRB in FILEAREA      | cursor MOUSE#mark BOX              |
+ | S-DLB in FILEAREA      | cursor MOUSE#mark LINE             |
+ | S-PLB in FILEAREA      | cursor MOUSE#reset BLOCK#mark LINE |
+ | S-PRB in FILEAREA      | cursor MOUSE#mark LINE             |
+ +------------------------+------------------------------------+
+
+ +------------------------+------------------------------------+
+ | Mouse Event (ncurses)  |  Command(s)                        |
+ +------------------------+------------------------------------+
+ |   2LB in FILEAREA      | cursor MOUSE#sos EDIT              |
+ |   2LB in PREFIX        | cursor MOUSE#sos EDIT              |
+ |   CLB in CMDLINE       | cursor MOUSE                       |
+ |   CLB in DIVIDER       | screen 1                           |
+ |   CLB in FILEAREA      | cursor MOUSE                       |
+ |   CLB in IDLINE        | xedit                              |
+ |   CLB in PREFIX        | cursor MOUSE                       |
+ |   CLB in STATAREA      | status                             |
+ |   CRB in FILEAREA      | cursor MOUSE#sos MAKECURR          |
+ |   CRB in IDLINE        | xedit -                            |
+ |   CRB in PREFIX        | cursor MOUSE#sos MAKECURR          |
+ +------------------------+------------------------------------+
+
+
+-----
+NOTES:
+-----
+
+1.  In the X11 port, pressing the middle mouse button anywhere within the
+    THE window, will result in the contents of the X selection being pasted
+    where the text cursor is currently displayed.  If you hold down
+    any modifier key, such as SHIFT or CONTROL, that sequence is
+    passed to THE and can be mapped. Therefore; PMB or RMD is NOT
+    able to be used in THE, but C-PMB, C-RMB, S-PMB etc. can.
+
+2.  The button action DOUBLE_CLICKED will always be preceded by a CLICK
+    action. This is the case for THE with ncurses or PDCurses. Therefore
+    itis usually a good idea to have the CLICK action assigned to a
+    cursor positioning command if the DOUBLE_CLICK for the same button is
+    used.
+
+**man-end**********************************************************************/

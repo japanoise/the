@@ -1,0 +1,11 @@
+* THE Function Syntax file for RexxUtil
+: KEYWORD LITERAL
+SysStemCopy( from, to[, fromindex, toindex, count, insertoverlay]] )
+SysStemSort( stem[, order] [,sensitivity] [,startpos, endpos] [,firstcol, lastcol] )
+> stem: Must have 0 item set to number of items. Must end in trailing period.
+> order: 'Ascending' or 'Descending'
+> sensitivity: 'Sensitive' or 'Insensitive'
+> startpos: First row (inclusive) to start sorting
+> endpos: Last row (inclusive) to start sorting
+> startcol: First column (inclusive) to start sorting
+> endcol: Last column (inclusive) to start sorting

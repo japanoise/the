@@ -1,0 +1,61 @@
+*
+* This file contains the THE Language Definition for RPM spec files.
+* It is based heavily on Kedit's KLD file format.
+*
+* Name = spec
+*
+:case
+  ignore
+:identifier
+  [a-zA-Z_{] [a-zA-Z0-9_{}:]
+:comment
+  line dnl any
+  line # any
+:header
+  line % column 1
+:keyword
+  autoprov: alt 5
+  autoreq: alt 5
+  autoreqprov: alt 5
+  buildroot: alt 5
+  conflicts: alt 5
+  epoch: alt 5
+  excludearch: alt 5
+  excludeos: alt 5
+  exclusivearch: alt 5
+  exclusiveos: alt 5
+  group: alt 5
+  icon: alt 5
+  license: alt 5
+  name: alt 5
+  nopatch: alt 5
+  nosource: alt 5
+  packager: alt 5
+  patch: alt 5
+  prefix: alt 5
+  provides: alt 5
+  release: alt 5
+  requires: alt 5
+  buildrequires: alt 5
+  buildarch: alt 5
+  source: alt 5
+  summary: alt 5
+  url: alt 5
+  vendor: alt 5
+  version: alt 5
+  {_lib}
+  {_libdir}
+  {_tmppath}
+  {buildroot}
+  {group}
+  {license}
+  {name}
+  {packager}
+  {prefix}
+  {provides}
+  {release}
+  {source}
+  {summary}
+  {url}
+  {vendor}
+  {version}

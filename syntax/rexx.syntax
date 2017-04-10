@@ -1,0 +1,194 @@
+* Function Syntax for Regina Rexx
+*
+* Blank lines and lines beginning with * are ignored
+* Lines beginning with : are directives. Directives consist of one mandatory word.
+* The purpose of directives are:
+* - OPTIONAL - Characters that signify optional arguments for function definitions. These
+*              are removed from the text that is inserted into the file.
+* - IGNOREAFTER - A string which delimits text to be inserted into the file (to the left of the
+*                 delimiter) and advisory text which is not inserted
+* - KEYWORD - How the keyword in this syntax file is altered before inserting into the file.
+*             Can be specified in included files
+*             UPPER - Keyword uppercased before inserting (requires UPPER BIF)
+*             LOWER - Keyword lowercased before inserting (requires LOWER BIF)
+*             INITCAP - Keyword lowercased and first character uppercased before inserting
+*                       (requires UPPER and LOWER BIF; UPPER BIF with start & length args)
+*             LITERAL - Keyword inserted without changes from syntax file
+* - ARGSTART - Character that delineates the start of arguments
+* - INCLUDE - Specifies a filename (in MACROPATH) containingmore function syntax definitions
+*
+* Lines that begin with '>' are further details associated with the function syntax
+* All other lines are instructions/functions. The first word must start in column 1 and be
+* specified in lower case.
+*
+* To extend this file with your own functions, simply add them with the same format as existing
+* lines.
+*
+:OPTIONAL []
+:IGNOREAFTER -
+:KEYWORD INITCAP
+:ARGSTART (
+:ARGEND )
+:INCLUDE rexxdw.syntax
+:INCLUDE rexxeec.syntax
+:INCLUDE rexxutil.syntax
+
+* address
+* arg
+* call
+* do/end
+* drop
+* exit
+* if/then/else
+* interpret
+* iterate
+* leave
+* nop
+* numeric
+* options
+* parse
+* procedure
+* pull
+* push
+* queue
+* return
+* say
+* select/when/otherwise
+* signal
+* trace
+* upper
+
+abbrev(long, short [,length]) - (ANSI)
+>Returns 1 if the string <short> is strictly equal to the initial first part of the string <long>,
+>and returns 0 otherwise.  The minimum length which <short> must have, can be specified as length.
+>If length is unspecified, no minimum restrictions for the length of <short> applies,
+>and thus the nullstring is an abbreviation of any string.
+
+abs(number) - (ANSI)
+address([option]) - (ANSI)
+arg([argno [,option]]) - (ANSI)
+b2c(binstring) - (AREXX)
+b2x(binstring) - (ANSI)
+beep(frequency [,duration]) - (OS/2)
+bitand(string1 [,[string2] [,padchar]]) - (ANSI)
+bitchg(string, bit) - (AREXX)
+bitclr(string, bit) - (AREXX)
+bitcomp(string1, string2, bit [,pad]) - (AREXX)
+bitor(string1 [, [string2] [,padchar]]) - (ANSI)
+bitset(string, bit) - (AREXX)
+bittst(string, bit) - (AREXX)
+bitxor(string1[, [string2] [,padchar]]) - (ANSI)
+buftype() - (CMS)
+c2b(string) - (AREXX)
+c2d(string [,length]) - (ANSI)
+c2x(string) - (ANSI)
+cd(directory) - (REGINA)
+chdir(directory) - (REGINA)
+center(string, length [, padchar ] ) - (ANSI)
+centre(string, length [, padchar ] ) - (ANSI)
+changestr(needle, haystack, newneedle ) - (ANSI)
+charin([streamid] [,[start] [,length]]) - (ANSI)
+charout([streamid] [,[string] [,start]]) - (ANSI)
+chars([streamid]) - (ANSI)
+close(file) - (AREXX)
+compare(string1, string2 [,padchar]) - (ANSI)
+compress(string [,list]) - (AREXX)
+condition([option]) - (ANSI)
+copies(string, copies) - (ANSI)
+countstr(needle, haystack) - (ANSI)
+crypt(string, salt) - (REGINA)
+datatype(string [,option]) - (ANSI)
+date([option_out [,date [,option_in]]]) - (ANSI)
+delstr(string, start [,length]) - (ANSI)
+delword(string,start[,length]) (ANSI)
+desbuf() - (CMS)
+digits() - (ANSI)
+directory([new directory]) - (OS/2)
+d2c(integer [,length]) - (ANSI)
+d2x(integer [,length]) - (ANSI)
+dropbuf([number]) - (CMS)
+eof(file) - (AREXX)
+errortext(errno [, lang]) - (ANSI)
+exists(filename) - (AREXX)
+export(address, [string], [length] [,pad]) - (AREXX)
+filespec(option, filespec) - (OS/2)
+find(string, phrase) - (CMS)
+fork() - (REGINA)
+form() - (ANSI)
+format(number [,[before] [,[after] [,[expp] [,[expt]]]]]) - (ANSI)
+freespace(address, length) - (AREXX)
+fuzz() - (ANSI)
+getenv(environmentvar) - (REGINA)
+getpid() - (REGINA)
+getspace(length) - (AREXX)
+gettid() - (REGINA)
+hash(string) - (AREXX)
+import(address [,length]) - (AREXX)
+index(haystack, needle [,start]) - (CMS)
+insert(string1, string2 [,position [,length [,padchar]]]) - (ANSI)
+justify(string, length [,pad]) - (CMS)
+lastpos(needle, haystack [,start]) - (ANSI)
+left(string, length [,padchar]) - (ANSI)
+length(string) - (ANSI)
+linein([streamid][,[line][,count]]) (ANSI)
+lineout([streamid] [,[string] [,line]]) - (ANSI)
+lines([streamid] [,option]) - (ANSI)
+lower(string [,start [,length [,pad]]]) - (REGINA)
+makebuf() - (CMS)
+max(number1 [,number2] ...) - (ANSI)
+min(number [,number] ...) - (ANSI)
+open(file, filename, ['Append'|'Read'|'Write']) - (AREXX)
+overlay(string1, string2 [,[start] [,[length] [,padchar]]]) - (ANSI)
+poolid() - (REGINA)
+popen(command [,stem.]) - (REGINA)
+pos(needle, haystack [,start]) - (ANSI)
+putenv(environmentvar=[value]) - (REGINA)
+qualify([streamid]) - (ANSI)
+queued() - (ANSI)
+random(max) - (ANSI)
+random([min] [,[max] [,seed]]) - (ANSI)
+randu([seed]) - (AREXX)
+readch(file, length) - (AREXX)
+readln(file) - (AREXX)
+reverse(string) - (ANSI)
+right(string, length[,padchar]) - (ANSI)
+rxfuncadd(externalname, library, internalname) - (SAA)
+rxfuncdrop(externalname) - (SAA)
+rxfuncerrmsg() - (REGINA)
+rxfuncquery(externalname) - (SAA)
+rxqueue(command [,queue|timeout]) - (OS/2)
+seek(file, offset, ['Begin'|'Current'|'End') - (AREXX)
+show(option, [name], [pad]) - (AREXX)
+sign(number) - (ANSI)
+sleep(seconds) - (CMS)
+sourceline([lineno]) - (ANSI)
+space(string[, [length] [,padchar]]) - (ANSI)
+state(streamid) - (CMS)
+storage([address], [string], [length], [pad]) - (AREXX)
+stream(streamid[,option[,command]]) (ANSI)
+strip(string [,[option] [,char]]) - (ANSI)
+substr(string, start [,length [,padchar]]) - (ANSI)
+subword(string, start [,length]) - (ANSI)
+symbol(name) - (ANSI)
+time([option_out [,time [option_in]]]) - (ANSI)
+trace([setting]) - (ANSI)
+translate(string [,[tableout] [,[tablein] [,padchar]]]) - (ANSI)
+trim(string) - (AREXX)
+trunc(number [,length]) - (ANSI)
+uname([option]) - (REGINA)
+unixerror(errorno) - (REGINA)
+upper(string [,start [,length [,pad]]]) - (AREXX/REGINA)
+userid() - (REGINA)
+value(symbol [,[value], [pool]]) - (ANSI)
+verify(string, ref [,[option] [,start]]) - (ANSI)
+word(string, wordno) - (ANSI)
+wordindex(string, wordno) - (ANSI)
+wordlength(string, wordno) - (ANSI)
+wordpos(phrase, string [,start]) - (ANSI)
+words(string) - (ANSI)
+writech(file, string) - (AREXX)
+writeln(file, string) - (AREXX)
+xrange([start] [,end]) - (ANSI)
+x2b(hexstring) - (ANSI)
+x2c(hexstring) - (ANSI)
+x2d(hexstring [,length]) - (ANSI)

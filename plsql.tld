@@ -1,0 +1,283 @@
+* PL_SQL.KLD - KEDIT Language Definition for PL/SQL programs
+* Version 1.0 - June 1997
+
+* PLSQL.KLD created by Bryan Barbeau (bbarbeau@ix.netcom.com)
+
+
+*  case is not significant, so ignore it
+:case
+ ignore
+
+:option
+  function ( blank default alt 4
+
+* Identifiers consist of a letter optionally followed by more letters,
+* numbers, dollar sign, underscores, or number signs.
+:identifier
+ [a-zA-Z]  [a-zA-Z0-9$_#]
+
+* Comment lines can be paired /* */ symbols or where -- is found
+:comment
+ line -- any
+ paired /* */ nonest
+ line rem column 1
+
+:string
+ single
+
+* use C like language rules for number coloring
+:number
+ C
+
+* block and loop labels look like this <<example>>
+*:label
+* Delimiter >> any
+
+:match
+* match labels
+* these statements need to be in this order or else the matching won't work right
+(     )
+<<  >>
+if end+if then,else,elsif
+loop end+loop
+begin end
+
+:keyword
+* Oracle 7 keywords only
+ abort
+ accept alt 7
+ access
+ add
+ all
+ alter
+ and
+ any
+ array
+ arraylen
+ as
+ asc
+ assert
+ assign
+ at
+ authorization
+ avg
+ base_table
+ begin
+ between
+ binary_integer
+ body
+ boolean
+ by
+ cache
+ cascade
+ case
+ char
+ char_base
+ check
+ close
+ cluster
+ colauth
+ column alt 7
+ columns
+ commit
+ compress
+ connect
+ constant
+ constraint
+ constraints
+ count
+ crash
+ create
+ current
+ cursor
+ currval
+ database
+ data_base
+ date
+ dba
+ debugoff
+ debugon
+ declare
+ decimal
+ default
+ definition
+ delay
+ delete
+ delta
+ desc
+ digits
+ disable
+ dispose
+ distinct
+ do
+ drop
+ else
+ elsif
+ end
+ entry
+ exception
+ exception_init
+ exists
+ exit
+ false
+ fetch
+ float
+ for
+ foreign
+ form
+ found
+ freelist
+ freelists
+ from
+ function alt e
+ generic
+ goto
+ grant
+ group
+ groups
+ having
+ identified
+ if
+ in
+ increment
+ index
+ indexes
+ indicator
+ initial
+ initrans
+ insert
+ integer
+ intersect
+ into
+ is
+ key
+ level
+ like
+ limited
+ loop
+ max
+ maxextents
+ maxtrans
+ min
+ minextents
+ minus
+ minvalue
+ mlslabel
+ mod
+ modify
+ natural
+ new
+ next
+ nextval
+ nocache
+ nocompress
+ nocycle
+ noorder
+ not
+ notfound
+ null
+ number
+ number_base
+ of
+ on
+ open
+ option
+ or
+ order
+ others
+ out
+ package
+ partition
+ pctfree
+ pctincrease
+ pctused
+ positive
+ pragma
+ primary
+ prior
+ private
+ procedure alt e
+ prompt alt 7
+ public
+ raise
+ range
+ real
+ record
+ references
+ release
+ rem
+ rename
+ replace
+ resource
+ return
+ reverse
+ revoke
+ rollback
+ rowid
+ rowlabel
+ rownum
+ rowtype
+ run
+ savepoint
+ schema
+ select
+ separate
+ sequence
+ set alt 7
+ show alt 7
+ size
+ smallint
+ space
+ spool alt 7
+ sql
+ sqlcode
+ sqlerrm
+ start
+ statement
+ stddev
+ subtype
+ sum
+ synonym
+ sysdate
+ tabauth
+ table
+ tables
+ tablespace
+ task
+ terminate
+ text
+ then
+ to
+ true
+ type
+ union
+ unique
+ update
+ use
+ using
+ values
+ varchar
+ varchar2
+ variance
+ view
+ views
+ when
+ where
+ while
+ with
+ work
+ xor
+
+:function
+ substr
+ upper
+ length
+ nvl
+ rtrim
+ to_char
+ to_number
+ to_date
+
+:postcompare
+CLASS [+-=/*<>&%@!~^|.;]
+

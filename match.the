@@ -1,0 +1,94 @@
+/*
+$Id: match.the,v 1.5 2011/07/09 23:47:46 mark Exp $
+*/
+/***********************************************************************/
+/* Description: REXX macro to match pairs of keywords                  */
+/* Syntax:      match                                                  */
+/* Notes:       This macro will mark a line block enclosing all lines  */
+/*              that are enclosed by a matching pair of keywords.      */
+/*              Keywords can actually be more than 1 word, like        */
+/*              'end if' but are specified as 1 word.                  */
+/*              Supported keyword pairs are:                           */
+/*               #if      - #endif                                     */
+/*               begin    - end;                                       */
+/*               do       - end                                        */
+/*               if       - endif                                      */
+/*               loop     - endloop                                    */
+/*               \begin{  - \end{                   (added by A. Pool) */
+/* Bugs:        Only keywords that START a line are considered for     */
+/*              matching and each keyword must be on separate lines.   */
+/***********************************************************************/
+Trace o
+string.1 =  '> #IF #ENDIF'
+string.2 =  '< #ENDIF #IF'
+string.3 =  '> BEGIN END;'
+string.4 =  '< END; BEGIN'
+string.5 =  '> DO END'
+string.6 =  '< END DO'
+string.7 =  '> IF ENDIF'
+string.8 =  '< ENDIF IF'
+string.9 =  '> LOOP ENDLOOP'
+string.10 = '< ENDLOOP LOOP'
+string.11 = '> \BEGIN{ \END{'                      /* added by A. Pool */
+string.12 = '< \END{ \BEGIN{'                      /* added by A. Pool */
+string.13 = '> <TABLE </TABLE>'
+string.14 = '< </TABLE> <TABLE'
+string.15 = '> <TR </TR>'
+string.16 = '< </TR> <TR'
+string.17 =  '> #ELSE #ENDIF'
+string.18 =  '> #IFDEF #ENDIF'
+num_string = 18
+
+'EXTRACT /LINE/CURLINE/'/* get the focus line contents and line number */
+save_current_line = line.1
+keyword = Word( Translate( Space( curline.3 ) ), 1 )
+stridx = 0
+say '['keyword']'
+Do i = 1 To num_string                             /* find a keyword...*/
+   source = Word( string.i, 2 )
+say source
+   If keyword = source Then
+      Do
+        stridx = i
+        Leave
+      End
+End
+If stridx = 0 Then                       /* if no keyword found, error */
+   Do
+     'EMSG Unknown match string'
+     Exit
+   End
+/*
+ * We have a keyword on the current line, look for its pair
+ */
+'preserve'
+num_source = 1
+num_target = 0
+direction = Word( string.stridx, 1 )
+source = Word( string.stridx, 2 )
+target = Word( string.stridx, 3 )
+Do Forever                                  /* find matching keyword...*/
+   If direction = '>' Then 'N'
+   Else 'U'
+   If rc \= 0 Then Leave
+   'EXTRACT /CURLINE/'
+   keyword = Word( Translate( Space( curline.3 ) ), 1 )
+   Select
+     When keyword = source Then num_source = num_source + 1
+     When keyword = target Then num_target = num_target + 1
+     Otherwise
+   End
+   If num_source = num_target Then                 /* if match found...*/
+      Do
+        'reset block'
+        'mark line'                             /*...mark a line block */
+        ':'||save_current_line
+        'mark line'
+        'restore'
+        Return
+      End
+End
+'EMSG No matching target' target  'found for' source
+':'||save_current_line
+'restore'
+Return

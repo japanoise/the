@@ -1,0 +1,96 @@
+/**/
+Parse Arg option
+'EDITV SETL SCM_ERROR_LINES 10'
+'EDITV SETL SCM_LOG_FILE build.log'
+vc_error = "!fn '(' !line ') :' . 'error' . ':' !msg"
+vc_warning = "!fn '(' !line ') : warning' . ':' !msg"
+wcc_error = "!fn '(' !line '): Error!' . ':' !msg"
+wcc_warning = " !fn '(' !line '): Warning!' . ':' !msg"
+gcc_error = "!fn ':' !line ':' !msg"
+gcc_warning = "!fn ':' !line ': warning:' !msg"
+'extract /version'
+Select
+   When version.3 = 'WIN32' Then
+      Do
+         machine = Value('COMPUTERNAME',,'ENVIRONMENT')
+      End
+   When version.3 = 'UNIX' | version.3 = 'QNX' Then
+      Do
+         machine = 'hostname'()
+      End
+   Otherwise machine = '?'
+End
+Select
+   When option = 'the-vc' Then
+      Do
+         If machine = 'SNARK' Then pth = 'e:\the'
+         Else pth = 'f:\the-2.8'
+         'EDITV SETL SCM_KEY_EXIT F3'
+         'EDITV SETL SCM_KEY_SHOW1 ENTER'
+         'EDITV SETL SCM_KEY_SHOW2 2LB in FILEAREA'
+         'EDITV SETL SCM_MAKE_COMMAND nmake -f' pth || '\vcwin32.mak INT=REXXTRANS the.exe'
+         'EDITV SETL SCM_MAKE_DIR' pth || '\vc-rexxtrans'
+         "EDITV SETL SCM_ERROR_FORMAT" vc_error
+         "EDITV SETL SCM_WARNING_FORMAT" vc_warning
+      End
+   When option = 'the-4r' Then
+      Do
+         If Value('COMPUTERNAME',,'ENVIRONMENT') = 'SNARK' Then pth = 'e:\the'
+         Else pth = 'f:\the-2.8'
+         'EDITV SETL SCM_KEY_EXIT F3'
+         'EDITV SETL SCM_KEY_SHOW1 ENTER'
+         'EDITV SETL SCM_KEY_SHOW2 2LB in FILEAREA'
+         'EDITV SETL SCM_MAKE_COMMAND wmake -e -f' pth || '\wccwin32.mak DEBUG=Y INT=REXXTRANS the.exe'
+         'EDITV SETL SCM_MAKE_DIR' pth || '\4r'
+         "EDITV SETL SCM_ERROR_FORMAT" wcc_error
+         "EDITV SETL SCM_WARNING_FORMAT" wcc_warning
+      End
+   When option = 'the-ncurses' Then
+      Do
+         'EDITV SETL SCM_KEY_EXIT F3'
+         'EDITV SETL SCM_KEY_SHOW1 ENTER'
+         'EDITV SETL SCM_KEY_SHOW2 2LB in FILEAREA'
+         'EDITV SETL SCM_MAKE_COMMAND make the'
+         'EDITV SETL SCM_MAKE_DIR /home/mark/THE-2.8/ncurses'
+         "EDITV SETL SCM_ERROR_FORMAT" gcc_error
+         "EDITV SETL SCM_WARNING_FORMAT" gcc_warning
+      End
+   When option = 'the-xcurses' Then
+      Do
+         'EDITV SETL SCM_KEY_EXIT F3'
+         'EDITV SETL SCM_KEY_SHOW1 ENTER'
+         'EDITV SETL SCM_KEY_SHOW2 2LB in FILEAREA'
+         'EDITV SETL SCM_MAKE_COMMAND make the'
+         'EDITV SETL SCM_MAKE_DIR /home/mark/THE-2.8/xcurses'
+         "EDITV SETL SCM_ERROR_FORMAT" gcc_error
+         "EDITV SETL SCM_WARNING_FORMAT" gcc_warning
+      End
+   When option = 'tos' Then
+      Do
+         'EDITV SETL SCM_KEY_EXIT F3'
+         'EDITV SETL SCM_KEY_SHOW1 ENTER'
+         'EDITV SETL SCM_KEY_SHOW2 2LB in FILEAREA'
+         'EDITV SETL SCM_MAKE_COMMAND nmake DEBUG=Y'
+         'EDITV SETL SCM_MAKE_DIR e:\tos\rel5\server\make'
+         "EDITV SETL SCM_ERROR_FORMAT" vc_error
+         "EDITV SETL SCM_WARNING_FORMAT" vc_warning
+         "EDITV SETL SCM_SOFTWARE vss"
+      End
+   When option = 'tos4' Then
+      Do
+         'EDITV SETL SCM_KEY_EXIT F3'
+         'EDITV SETL SCM_KEY_SHOW1 ENTER'
+         'EDITV SETL SCM_KEY_SHOW2 2LB in FILEAREA'
+         'EDITV SETL SCM_MAKE_COMMAND nmake DEBUG=Y'
+         'EDITV SETL SCM_MAKE_DIR e:\tos\rel4\server\make'
+         "EDITV SETL SCM_ERROR_FORMAT" vc_error
+         "EDITV SETL SCM_WARNING_FORMAT" vc_warning
+         "EDITV SETL SCM_SOFTWARE vss"
+      End
+   Otherwise
+      Do
+         'emsg Must supply an environment'
+         Return 1
+      End
+End
+Return 0

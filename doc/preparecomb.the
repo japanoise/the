@@ -1,0 +1,44 @@
+/* This macro postprocesses a HTML file in preparation for combining */
+/* multiple HTML documents together. */
+Parse Arg target verdot
+html_ext = '.html'
+files = 'app1 app2 app3 app4 app5 comm commset commsos glossary history index overview query quickref'
+'msgmode off'
+'extract /filename/fpath'
+/*
+ * If this is the PDF title page, change the version number and that's it!
+ */
+thisyear = Left( Date( 'S' ), 4 )
+If fname.1() = 'title' Then
+   Do
+      'top'
+      'c/VERDOT/'verdot'/ * *'
+      'c/THISYEAR/'thisyear'/ * *'
+      'ffile' fpath.1 || filename.1 || '.new'
+      Return 0
+   End
+
+'all\<a name\ & \</A>\'
+'nomsg c/"/"' || Changestr(' ',Translate(filename.1,'_','.'),'') || '_/ * 1'
+'all\<a href\ & \</A>\'
+Do i = 1 To Words(files)
+   'nomsg c/"' || Word(files,i) || html_ext || '#/"#' || Changestr(' ',Translate(Word(files,i)||html_ext,'_','.'),'') || '_/ * *'
+End
+'all'
+'top'
+If target = 'pdf' Then 'c/.png/.gif/ * *'
+'bot'
+'i <!-- PAGE BREAK -->'
+/*
+ * If this is the overview file and we are processing for PDF output
+ * add a H1
+ */
+If fname.1() = 'overview' Then
+   Do
+      'top'
+      'f <head>'
+      'r <head><title>THE Reference Manual Version' verdot'</title></head>'
+      'f <body'
+      'i <center><h1>THE Reference Manual <br>Version' verdot '</h1></center>'
+   End
+'ffile' fpath.1 || filename.1 || '.new'

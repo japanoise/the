@@ -1,0 +1,241 @@
+/*
+ * This macro provides a simplistic, extensible mechanism for providing
+ * context-sensitive help for language instructions/functions.
+ * Simply assign a key to this macro; DEFINE F1 macro syntax F1
+ *
+ * When the macro is invoked, the current COLORING is queried. If there is
+ * a parsing engine enabled for the file, (see QUERY COLORING), then a
+ * check is made for the matching "syntax" file for the parser in MACROPATH.
+ * If found, then the word (non-blank) at the cursor position is extracted and
+ * mathed against all keywords present in the "syntax" file, and a popup menu
+ * is displayed with all matches from the file.  Use the up and down arrow keys
+ * to select the item, and it will be inserted (after adjustment; see rexx.syntax
+ * for details) into the filearea where the matched text exists.
+ * To ignore the insertion, press 'q'. To see extended help (if it exists) on the
+ * highlighted match, press the key specified in the DEFINE statement (the first
+ * argument to this macro).
+ */
+!global.!path.unix = ':'
+!global.!dir.unix = '/'
+!global.!path.windows = ';'
+!global.!dir.windows = '\'
+!global.!delim = x2c( 'FF' )
+
+!globalv = '!global. fieldword. coloring. cursor. curline.'
+
+Parse Arg key
+If key = '' Then Call Abort 'No escape key provided'
+
+!global.!keyword_values = 'UPPER LOWER INITCAP LITERAL'
+'Extract /fieldword/coloring/cursor/curline'
+If coloring.1 = 'ON' Then
+   Do
+      !global.!func = Translate( fieldword.2 )
+      !global.!lenfunc = Length( !global.!func )
+      !global.!idx = 0
+      !global.!match.0 = 0
+      Call ProcessFile coloring.3'.syntax', 1
+      initial_item = 1
+      If !global.!match.0 \= 0 Then
+         Do Forever
+            cmd = 'POPUP BELOW KEYS' key 'INITIAL' initial_item !global.!delim
+            Do i = 1 To !global.!match.0
+               cmd = cmd || !global.!match.i || !global.!delim
+            End
+            cmd
+            If popup.1 \= '' Then
+               Do
+                  initial_item = popup.2
+                  Parse Var popup.1 keyword (!global.!argstart) args (!global.!argend) . (!global.!ignoreafter) .
+                  idx = popup.2
+                  If popup.4 = 1 Then
+                     Do
+                        /*
+                         * Our alternate key ended the popup, see if we have details
+                         */
+                        If !global.!details.idx \= '' Then
+                           Do
+                              !global.!details.idx = Changestr( !global.!delim, Substr( !global.!details.idx, 2 ), d2c(10) )
+                              cmd = 'DIALOG' || !global.!delim || !global.!details.idx || !global.!delim 'TITLE /Details for' keyword'/ OK'
+                              cmd
+                           End
+                     End
+                  Else
+                     Do
+                        args = Strip( args )
+                        Do i = 1 To Length( !global.!optional )
+                           args = Changestr( Substr( !global.!optional, i, 1 ), args, '' )
+                        End
+                        /*
+                         * We have the text to insert, we now have to work out where
+                         * the text started in the current line and overlay the new
+                         * text at that location.
+                         * If we have a later version of THE with FIELDWORD.3 then its easy...
+                         */
+                        If fieldword.0 = 3 Then
+                           Do
+                              res = InsertText( !global.!keyword.idx, curline.3, cursor.4, fieldword.3, !global.!func, args )
+                           End
+                        Else
+                           Do
+                              /*
+                               * We have to start at the cursor location and search backwards until we
+                               * find the location in the line where the keyword starts
+                               */
+                              Do i = cursor.4 To 1 By -1
+                                 If Translate( curline.3 ) = Translate( Overlay( !global.!func, curline.3, i ) ) Then
+                                    Do
+                                       res = InsertText( !global.!keyword.idx, curline.3, cursor.4, i, !global.!func, args )
+                                       Leave
+                                    End
+                              End
+                           End
+                        'r' res
+                        Leave
+                     End
+               End
+            Else Leave
+         End
+      Else
+         Do
+            Call Abort 'No matches for "'!global.!func'".'
+            Exit 0
+         End
+   End
+Else
+   Do
+      Call Abort 'COLORING is not on for this file'
+   End
+Exit 0
+
+ProcessFile: Procedure Expose (!globalv)
+Parse Arg fname, initial
+-- some defaults
+!global.!keyword_format.initial = 'NONE'
+sfile = GetSyntaxFile( fname )
+If sfile \= '' Then sf = Stream( sfile, 'C', 'QUERY EXISTS' )
+If sf = '' Then
+   Do
+--      If initial Then Call Abort 'Syntax file:' fname 'does not exist in MACROPATH.'
+--      Else Call Abort 'Included file:' fname 'does not exist.'
+      If initial Then Call Warning 'Syntax file:' fname 'does not exist in MACROPATH.'
+      Else Call Warning 'Included file:' fname 'does not exist.'
+      Return
+   End
+Call Stream sf, 'C', 'OPEN READ'
+Do While Lines( sf ) > 0
+   line = Linein( sf )
+   Select
+      When Left( line, 1 ) = '*' Then Iterate
+      When Left( line, 1 ) = ':' Then
+         Do
+            Parse Var line ':' directive value .
+            If initial = 0 & directive \= 'KEYWORD' Then Call Abort 'Invalid directive:' directive 'invalid in included files.'
+            Select
+               When directive = 'OPTIONAL' Then !global.!optional = value
+               When directive = 'IGNOREAFTER' Then !global.!ignoreafter = value
+               When directive = 'ARGSTART' Then !global.!argstart = value
+               When directive = 'ARGEND' Then !global.!argend = value
+               When directive = 'INCLUDE' Then
+                  Do
+                     Call ProcessFile value, 0
+                  End
+               When directive = 'KEYWORD' Then
+                  Do
+                     If Wordpos( value, !global.!keyword_values ) = 0 Then Call Abort 'Invalid value of "'value'" for directive :'directive'. Valid values:' !global.!keyword_values
+                     !global.!keyword_format.initial = value
+                  End
+               Otherwise
+                  Do
+                     Call Abort 'Unknown directive :'directive'.'
+                  End
+            End
+            If value = '' Then Call Abort 'Must supply a value for directive :'directive'.'
+         End
+      When Left( line, 1 ) = '>' & new_keyword = 1 Then
+         Do
+            idx = !global.!idx
+            !global.!details.idx = !global.!details.idx || !global.!delim || Substr( line, 2 )
+         End
+      When Left( Translate( line ), !global.!lenfunc ) = !global.!func Then
+         Do
+            !global.!idx = !global.!idx + 1
+            idx = !global.!idx
+            Parse Var line keyword (!global.!argstart) .
+            Select
+               When !global.!keyword_format.initial = 'UPPER' Then
+                  Do
+                     !global.!keyword.idx = Translate( keyword )
+                  End
+               When !global.!keyword_format.initial = 'INITCAP' Then
+                  Do
+                     fc = Translate( Left( keyword, 1 ) )
+                     !global.!keyword.idx = Overlay( fc, keyword , 1, 1 )
+                  End
+               Otherwise
+                  Do
+                     !global.!keyword.idx = keyword
+                  End
+            End
+            !global.!match.idx = line
+            !global.!match.0 = !global.!idx
+            !global.!details.idx = ''
+            new_keyword = 1
+         End
+      Otherwise
+         Do
+            new_keyword = 0
+         End
+   End
+End
+Call Stream sf, 'C', 'CLOSE'
+Return
+
+GetSyntaxFile: Procedure Expose (!globalv)
+Parse Arg sf
+'extract /macropath'
+os = GetOS()
+mp = macropath.1
+Do While mp \= ''
+   Parse Var mp dir (!global.!path.os) mp
+   If Right( dir, 1 ) \= !global.!dir.os Then dir = dir||!global.!dir.os
+   fn = dir || sf
+   If Stream( fn, 'C', 'QUERY EXISTS' ) \= '' Then Return fn
+End
+Return ''
+
+InsertText: Procedure Expose (!globalv)
+Parse Arg keyword, line, curpos, fieldstart, func, args
+If coloring.3 = 'rexx' Then
+   Do
+      Parse Var line 1 call =(fieldstart) .
+      If Translate( Strip( call ) ) = 'CALL' Then args = ' 'args
+      Else args = !global.!argstart || args || !global.!argend
+   End
+Else args = !global.!argstart || args || !global.!argend
+res = Delstr( curline.3, fieldstart, Length( func ) )
+res = Insert( keyword || args, res, fieldstart-1 )
+Return res
+
+GetOS: Procedure
+Parse Upper Source os .
+Select
+   When os = 'WINDOWSNT' Then os = 'WINDOWS'
+   When os = 'WIN32' Then os = 'WINDOWS'
+   When os = 'WIN64' Then os = 'WINDOWS'
+   When os = 'OS/2' Then os = 'WINDOWS'
+   When os = 'LINUX' Then os = 'UNIX'
+   When os = 'QNX' Then os = 'UNIX'
+   Otherwise Nop
+End
+Return os
+
+Abort:
+Parse Arg msg
+'EMSG' msg
+Exit 0
+
+Warning:
+Parse Arg msg
+'EMSG' msg
+Return

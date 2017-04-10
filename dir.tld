@@ -1,0 +1,19 @@
+*
+* This file contains the THE Language Definition for DIR.DIR file.
+* It is based heavily on Kedit's KLD file format.
+*
+* Name = *DIR
+*
+:case
+  ignore
+:directory
+  directory alt a
+  executable
+  link
+  extensions .bak alt 8
+  extensions .the alt 1
+  extensions .c .cc .cpp .h .hpp alt 2
+  extensions .rex .rexx .cmd alt 3
+  extensions .exe .dll alt 6
+  extensions .zip .Z .gz .tgz alt w
+  extensions Makefile .mak alt 4

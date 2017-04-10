@@ -1,0 +1,277 @@
+*
+* This file contains the THE Language Definition for NSIS installation scripts
+*
+* Name = *NSI
+*
+:case
+  ignore
+:option
+  preprocessor !
+:number
+  c
+:identifier
+  [$a-zA-Z] [a-zA-Z0-9_]
+:string
+  single
+  double
+:comment
+  line ; any
+  line # any
+  paired /* */ nest
+:label
+  delimiter : any
+:header
+  line #! column 1
+:match
+  ( )
+  { }
+  !ifdef,!ifndef,!if !endif
+:keyword
+  !ifdef
+  !ifndef
+  !if
+  !endif
+  !undef
+  !else
+  !macro
+  !macroend
+  !define
+  !verbose
+  !echo
+  !include
+  !insertmacro
+  !packhdr
+  !addplugindir
+*
+* Functions and section headings
+*
+  function alt 1
+  functionend alt 1
+  section alt 1
+  sectionin alt 1
+  sectionend alt 1
+  subsection alt 1
+  subsectionend alt 1
+  addsize alt 1
+*
+* Installer Attributes
+*
+  addbrandingimage alt r
+  allowrootdirinstall alt r
+  autoclosewindow alt r
+  bggradient alt r
+  brandingtext alt r
+  caption alt r
+  changeui alt r
+  checkbitmap alt r
+  completedtext alt r
+  componenttext alt r
+  crccheck alt r
+  custom alt r
+  detailsbuttontext alt r
+  dirshow alt r
+  dirtext alt r
+  fileerrortext alt r
+  icon alt r
+  installbuttontext alt r
+  installcolors alt r
+  installdir alt r
+  installdirregkey alt r
+  instprogressflags alt r
+  insttype alt r
+  licensebkcolor alt r
+  licensedata alt r
+  licensetext alt r
+  loadlanguagefile alt r
+  miscbuttontext alt r
+  name alt r
+  outfile alt r
+  page alt r
+  plugindir alt r
+  setfont alt r
+  showinstdetails alt r
+  showuninstdetails alt r
+  silentinstall alt r
+  silentuninstall alt r
+  spacetexts alt r
+  subcaption alt r
+  uninstallbuttontext alt r
+  uninstallcaption alt r
+  uninstallicon alt r
+  uninstallsubcaption alt r
+  uninstalltext alt r
+  windowicon alt r
+  xpstyle alt r
+*
+* Compiler Flags
+*
+  setcompress alt x
+  setcompressor alt x
+  setdatablockoptimize alt x
+  setdatesave alt x
+  setoverwrite alt x
+  setpluginunload alt x
+*
+* Known variables
+*
+  $0 alt 4
+  $1 alt 4
+  $2 alt 4
+  $3 alt 4
+  $4 alt 4
+  $5 alt 4
+  $6 alt 4
+  $7 alt 4
+  $8 alt 4
+  $9 alt 4
+  $R0 alt 4
+  $R1 alt 4
+  $R2 alt 4
+  $R3 alt 4
+  $R4 alt 4
+  $R5 alt 4
+  $R6 alt 4
+  $R7 alt 4
+  $R8 alt 4
+  $R9 alt 4
+  $INSTDIR alt 4
+  $WINDIR alt 4
+  $INSTDIR alt 4
+  $OUTDIR alt 4
+  $CMDLINE alt 4
+  $LANGUAGE alt 4
+  $PROGRAMFILES alt 4
+  $COMMONFILES alt 4
+  $DESKTOP alt 4
+  $EXEDIR alt 4
+  ${NSISDIR} alt 4
+  $WINDIR alt 4
+  $SYSDIR alt 4
+  $TEMP alt 4
+  $STARTMENU alt 4
+  $SMPROGRAMS alt 4
+  $SMSTARTUP alt 4
+  $QUICKLAUNCH alt 4
+  $DOCUMENTS alt 4
+  $SENDTO alt 4
+  $RECENT alt 4
+  $FAVORITES alt 4
+  $MUSIC alt 4
+  $PICTURES alt 4
+  $VIDEOS alt 4
+  $NETHOOD alt 4
+  $FONTS alt 4
+  $TEMPLATES alt 4
+  $APPDATA alt 4
+  $PRINTHOOD alt 4
+  $INTERNET_CACHE alt 4
+  $COOKIES alt 4
+  $HISTORY alt 4
+  $PROFILE alt 4
+  $ADMINTOOLS alt 4
+  $RESOURCES alt 4
+  $RESOURCES_LOCALIZED alt 4
+  $CDBURN_AREA alt 4
+  $HWNDPARENT alt 4
+  $PLUGINSDIR alt 4
+*
+* General Keywords
+*
+  abort
+  bringtofront
+  call
+  clearerrors
+  copyfiles
+  createdirectory
+  createshortcut
+  delete
+  deleteinisec
+  deleteinistr
+  deleteregkey
+  deleteregvalue
+  detailprint
+  exch
+  exec
+  execshell
+  execwait
+  file
+  fileclose
+  fileopen
+  fileread
+  filereadbyte
+  fileseek
+  filewrite
+  findfirst
+  findnext
+  findclose
+  getlabeladdress
+  getfunctionaddress
+  callinstdll
+  setdetailsview
+  getdlgitem
+  setstaticbkcolor
+  createfont
+  sendmessage
+  langstring
+  findwindow
+  getfullpathname
+  gettempfilename
+  goto
+  hidewindow
+  iferrors
+  iffileexists
+  intcmp
+  intfmt
+  intop
+  messagebox
+  nop
+  pop
+  push
+  readinistr
+  readenvstr
+  readregstr
+  regdll
+  return
+  reservefile
+  rmdir
+  searchpath
+  sectiongettext
+  sectionsettext
+  sectiongetflags
+  sectionsetflags
+  setbrandingimage
+  setoutpath
+  setrebootflag
+  setshellvarcontext
+  sleep
+  strcmp
+  strcpy
+  strlen
+  unregdll
+  var
+  writeinistr
+  writeregbin
+  writeregdword
+  writeregstr
+  writeregexpandstr
+  writeuninstaller
+  * Registry keys
+  HKCR                    alt r
+  HKEY_CLASSES_ROOT       alt r
+  HKLM                    alt r
+  HKEY_LOCAL_MACHINE      alt r
+  HKCU                    alt r
+  HKEY_CURRENT_USER       alt r
+  HKU                     alt r
+  HKEY_USERS              alt r
+  HKCC                    alt r
+  HKEY_CURRENT_CONFIG     alt r
+  HKDD                    alt r
+  HKEY_DYN_DATA           alt r
+  HKPD                    alt r
+  HKEY_PERFORMANCE_DATA   alt r
+  *
+  * true/false
+  *
+  true alt r
+  false alt r

@@ -1,0 +1,13 @@
+Source: the
+Section: editors
+Priority: optional
+Maintainer: Mark Hessling <mark@rexx.org>
+Build-Depends: debhelper (>= 5), autotools-dev
+Standards-Version: 3.7.2
+
+Package: the
+Architecture: any
+Depends: ${shlibs:Depends}
+Recommends: regina3 (>= 3.3-5)
+Suggests: regina3 (>= 3.3-5)
+Description: The Hessling Editor

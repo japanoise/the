@@ -1,0 +1,80 @@
+/*
+$Id: comm.the,v 1.3 2013/06/22 01:21:29 mark Exp $
+*/
+/***********************************************************************/
+/* Description: REXX macro to comment lines.                           */
+/* Syntax:      comm [target]                                          */
+/* Notes:       This macro will comment lines based on the file        */
+/*              type or file name as per below:                        */
+/*               .c       - /* */                                      */
+/*               .h       - /* */                                      */
+/*               .rex     - /* */                                      */
+/*               .rexx    - /* */                                      */
+/*               .pas     - (* *)                                      */
+/*               .asm     - ;                                          */
+/*               .htm     - <!-- -->                                   */
+/*               .html    - <!-- -->                                   */
+/*               makefile - #                                          */
+/*               Makefile - #                                          */
+/*              Full XEDIT/KEDIT/THE targets are supported.            */
+/***********************************************************************/
+Trace o
+arg1 = Arg(1)
+noargs = Arg()
+If noargs = 0 Then arg1 = '1'               /* no args - assume 1 line */
+forward = 1                  /* assume direction is forward by default */
+'COMMAND EXTRACT /LINE/SIZE/STAY/FTYPE/FNAME/LINEND'/* get various stuff */
+current_line = line.1                   /* save current line for later */
+reply = valid_target(arg1)                 /* validate supplied target */
+If reply = 'ERROR' Then
+   Do
+     'COMMAND EMSG Error 0017: Invalid target' arg1
+     Exit
+   End
+If reply = 'NOTFOUND' Then
+   Do
+     'COMMAND EMSG Error 0017: Target not found' arg1
+     Exit
+   End
+'command preserve'
+start_line = Word(reply,1)                        /* get starting line */
+nolines = Word(reply,2)                         /* get number of lines */
+If nolines < 0 Then Do                /* if target before current line */
+   forward = 0                    /* indicate direction to be backward */
+   nolines = nolines * -1                     /* make nolines positive */
+End
+If fname.1 = 'makefile' |  fname.1 = 'Makefile' Then 'SET LINEND OFF'
+':'||start_line                                    /* go to first line */
+totlines = 0                             /* reset changed line counter */
+Do nolines                              /* for each line to target ... */
+   'command EXTRACT /CURLINE/'               /* get current line contents, etc.*/
+   If focustof(),                      /* ignore line if on TOF or EOF */
+   |  focuseof() Then nop
+   Else
+      Do
+        Select               /* add comment characters to current line */
+          When ftype.1 = 'c' Then 'command REPLACE' '/*'||curline.3||'*/'
+          When ftype.1 = 'h' Then 'command REPLACE' '/*'||curline.3||'*/'
+          When ftype.1 = 'rex' Then 'command REPLACE' '/*'||curline.3||'*/'
+          When ftype.1 = 'rexx' Then 'command REPLACE' '/*'||curline.3||'*/'
+          When ftype.1 = 'pas' Then 'command REPLACE' '(*'||curline.3||'*)'
+          When ftype.1 = 'asm' Then 'command REPLACE' ';'||curline.3
+          When ftype.1 = 'sql' Then 'command REPLACE' 'rem '||curline.3
+          When ftype.1 = 'for' Then 'command REPLACE' 'C '||curline.3
+          When ftype.1 = 'htm' Then 'command REPLACE' '<!--' curline.3  '-->'
+          When ftype.1 = 'html' Then 'command REPLACE' '<!--' curline.3  '-->'
+          When fname.1 = 'makefile' Then 'command REPLACE' '#'||curline.3
+          When fname.1 = 'Makefile' Then 'command REPLACE' '#'||curline.3
+          Otherwise 'command REPLACE' '/*'||curline.3||'*/'
+        End
+        totlines = totlines + 1
+      End
+   If forward = 1 Then 'command N'          /* if going forward, get next line */
+   Else 'command U'                   /* if going backwards, get previous line */
+   If rc \= 0 Then Leave                         /* shouldn't get here */
+End
+If fname.1 = 'makefile' |  fname.1 = 'Makefile' Then 'command SET LINEND' linend.1 linend.2
+'command EMSG' totlines 'lines commented'        /* say how many lines changed */
+If stay.1 = 'ON' Then ':'||current_line
+'command restore'
+Return                                               /* go back to THE */

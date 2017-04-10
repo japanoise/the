@@ -1,0 +1,405 @@
+/*
+ * This macro is designed to be used when assigned to the 'space' key and
+ * pressed somewhere to the right of certain keywords.
+ * It creates template code depending on the language keyword to the left
+ * of the cursor.
+ * For those languages that ignore case, then the code added will be in
+ * the same format as the keyword. See the Rexx examples.
+ *
+ * To add new language support:
+ * 1) add the name of the parser returned by QUERY COLORING, to "supported_parsers"
+ * 2) add a new subroutine with the name of the name of the parser with
+ *    code similar to that of one of the supplied parsers.
+ *
+ * The automatic code completion can be turned on or off by passing 'toggle' to
+ * this macro. Again this is best implemented by assigning the macro and parameter
+ * to a key like c-e.
+ *
+ * Example:
+ *  define space macro codecomp.the
+ *  define c-e macro codecomp.the toggle
+ */
+supported_parsers = 'REXX C'
+'extract /coloring/field'
+If coloring.2 = 'AUTO' Then parser = Translate( coloring.3 )
+Else parser = Translate( coloring.2 )
+Parse Arg param
+Select
+   When param = 'toggle' Then Call toggle
+   Otherwise
+      Do
+         Call Expand
+         If result = 1 Then 'text  '
+      End
+End
+Exit 0
+
+Expand:
+'editv getf codecomp'
+If codecomp \= 'on' | field.4 \= 'TEXT' | coloring.1 = 'OFF' | Wordpos( parser, supported_parsers ) = 0 Then Return 1
+/*
+ * Determine keyword
+ */
+'extract /fieldword/cursor'
+keyword = fieldword.2
+Parse Var field.1 preceding =(field.3) following
+upper_keyword = Translate( keyword )
+keyword_start = field.3 - Length( keyword )
+Interpret 'Call' parser
+If result = 1 Then
+   Do
+      keyword = fieldword.1
+      Parse Var field.1 preceding =(field.3) following
+      upper_keyword = Translate( keyword )
+      keyword_start = field.3 - Length( keyword )
+      Interpret 'Call' parser
+   End
+Return result
+
+/*
+ * Format of keyword entries:
+ * Word 1: S or N
+ *         S - same line - text appended to keyword on same line
+ *         N - new line - text added as a new line
+ * Word 2: number of characters to indent text (for N)
+ *         position of cursor relative to start of keyword (for S)
+ *         the relative cursor position can be specified with preceding + signs:
+ *            this means move the cursor the absolute number of characters
+ *            relative to the start of the keyword, but on the line after the
+ *             current one depending on the number of + signs.
+ * Word 3...: Text to add
+ */
+Rexx:
+check_for_matching_case = 1
+keywords = 'IF DO SELECT WHEN ELSE /*'
+/*
+ * >>if<<
+ *
+ * "if": Results in:  "IF": Results in:  "If": Results in:
+ *
+ * if * then          IF * THEN          If * Then
+ *    do                 DO                 Do
+ *    end                END                End
+ *
+ */
+new.1.0 = 3
+new.1.1 = 'S 2  then'
+new.1.2 = 'N -    do'
+new.1.3 = 'N -    end /* do */'
+/*
+ * >>do<<
+ *
+ * "do": Results in:  "DO": Results in:  "Do": Results in:
+ *
+ * do                 DO                 Do
+ *   *                   *                  *
+ * end                END                End
+ *
+ */
+new.2.0 = 2
+new.2.1 = 'S 2'
+new.2.2 = 'N - end /* do */'
+/*
+ * >>select<<
+ *
+ * "select": Results in:  "SELECT": Results in:  "Select": Results in:
+ *
+ * select                 SELECT                 Select
+ *   when * then             WHEN * THEN            When * Then
+ *      do                      DO                     Do
+ *      end                     END                    End
+ *   otherwise               OTHERWISE              Otherwise
+ *      do                      DO                     Do
+ *      end                     END                    End
+ * end                    END                    End
+ */
+new.3.0 = 8
+new.3.1 = 'S +7'
+new.3.2 = 'N -    when then'
+new.3.3 = 'N -       do'
+new.3.4 = 'N -       end /* do */'
+new.3.5 = 'N -    otherwise'
+new.3.6 = 'N -       do'
+new.3.7 = 'N -       end /* do */'
+new.3.8 = 'N - end /* select */'
+/*
+ * >>when<<
+ *
+ * "when": Results in:  "WHEN": Results in:  "When": Results in:
+ *
+ * when * then          WHEN * THEN          When * Then
+ *    do                   DO                   Do
+ *    end                  END                  End
+ *
+ */
+new.4.0 = 3              /* WHEN */
+new.4.1 = 'S 4  then'     /* Results in; when then */
+new.4.2 = 'N -    do'
+new.4.3 = 'N -    end /* do */'
+/*
+ * >>else<<
+ *
+ * "else": Results in:  "ELSE": Results in:  "Else": Results in:
+ *
+ * else               ELSE               Else
+ *    do                 DO                 Do
+ *       *                  *                  *
+ *    end                END                End
+ *
+ */
+new.5.0 = 4
+new.5.1 = 'S ++5'
+new.5.2 = 'N -    do'
+new.5.3 = 'N -'
+new.5.4 = 'N -    end /* do */'
+/*
+ * >>startcomment<<
+ *
+ * "startcomment": Results in:
+ *
+ * <startcomment>
+ *    *
+ * <endcomment>
+ *
+ */
+!comment = 6
+new.6.0 = 3
+new.6.1 = 'S +2'
+new.6.2 = 'N -  *'
+new.6.3 = 'N -  */'
+
+idx = Wordpos( upper_keyword, keywords )
+If idx = 0 Then Return 1
+Call Construct check_for_matching_case
+Return 0
+
+C:
+check_for_matching_case = 0
+keywords = 'if switch case for while else /* #if #ifdef #ifndef #else' /* */
+/*
+ * >>if<<
+ *
+ * Results in:
+ *
+ * if ( * )
+ * {
+ * }
+ */
+new.1.0 = 3
+new.1.1 = 'S 4  ( )'
+new.1.2 = 'N - {'
+new.1.3 = 'N - }'
+/*
+ * >>switch<<
+ *
+ * Results in:
+ *
+ * switch ( * )
+ * {
+ *    case ?:
+ *       break;
+ *    default:
+ *       break;
+ * }
+ */
+new.2.0 = 7
+new.2.1 = 'S 8  ( )'
+new.2.2 = 'N - {'
+new.2.3 = 'N -    case ?:'
+new.2.4 = 'N -       break;'
+new.2.5 = 'N -    default:'
+new.2.6 = 'N -       break;'
+new.2.7 = 'N - }'
+/*
+ * >>case<<
+ *
+ * Results in:
+ *
+ * case *:
+ *    break;
+ */
+new.3.0 = 2
+new.3.1 = 'S 4 :'
+new.3.2 = 'N -    break;'
+/*
+ * >>for<<
+ *
+ * Results in:
+ *
+ * for ( *; ; )
+ * {
+ * }
+ */
+new.4.0 = 3
+new.4.1 = 'S 5  ( ; ; )'
+new.4.2 = 'N - {'
+new.4.3 = 'N - }'
+/*
+ * >>while<<
+ *
+ * Results in:
+ *
+ * while ( * )
+ * {
+ * }
+ */
+new.5.0 = 3
+new.5.1 = 'S 7  ( )'
+new.5.2 = 'N - {'
+new.5.3 = 'N - }'
+/*
+ * >>else<<
+ *
+ * Results in:
+ *
+ * else
+ * {
+ *    *
+ * }
+ */
+new.6.0 = 4
+new.6.1 = 'S ++2'
+new.6.2 = 'N - {'
+new.6.3 = 'N -'
+new.6.4 = 'N - }'
+/*
+ * >>startcomment<<
+ *
+ * "startcomment": Results in:
+ *
+ * <startcomment>
+ *    *
+ * <endcomment>
+ *
+ */
+!comment = 7
+new.7.0 = 3
+new.7.1 = 'S +2'
+new.7.2 = 'N -  *'
+new.7.3 = 'N -  */'
+/*
+ * >>#if<<
+ *
+ * Results in:
+ *
+ * #if
+ * #endif
+ */
+new.8.0 = 2
+new.8.1 = 'S 3'
+new.8.2 = 'N - #endif'
+/*
+ * >>#ifdef<<
+ *
+ * Results in:
+ *
+ * #ifdef
+ * #endif
+ */
+new.9.0 = 2
+new.9.1 = 'S 6'
+new.9.2 = 'N - #endif'
+/*
+ * >>#ifndef<<
+ *
+ * Results in:
+ *
+ * #ifndef
+ * #endif
+ */
+new.10.0 = 2
+new.10.1 = 'S 7'
+new.10.2 = 'N - #endif'
+/*
+ * >>#else<<   **** ignored ****
+ *
+ * Results in:
+ *
+ * #else
+ */
+new.11.0 = 1
+new.11.1 = 'S 5'
+
+idx = Wordpos( keyword, keywords )
+If idx = 0 Then Return 1
+Call Construct check_for_matching_case
+Return 0
+
+Construct:
+Parse Arg changecase
+/*
+ * Determine if we are in a string; if so do not do any expansion
+ */
+'extract /synelem'
+If synelem.1 = 'STRING' | synelem.1 = 'INCOMPLETESTRING' Then
+   Do
+      'text  '
+      Return 0
+   End /* Do */
+/*
+ * If we are in a comment and the keyword is a comment, then allow
+ * the expansion.
+ */
+If synelem.1 = 'COMMENT' & !comment \= idx Then
+   Do
+      'text  '
+      Return 0
+   End /* Do */
+case = DetermineCaseOfKeyword( changecase, keyword )
+Do i = 1 To new.idx.0
+   Parse Var new.idx.i action . text
+   If action = 'S' Then
+      Do
+         'clocate :'||field.3
+         'text' ChangeCaseOfKeyword( changecase, case, text )
+      End
+   Else
+      Do
+         'i' Copies( ' ', keyword_start - 1 ) || ChangeCaseOfKeyword( changecase, case, text )
+      End
+End
+offset = Word( new.idx.1, 2 )
+lines = Countstr( '+', offset )
+offset = Changestr( '+', offset, '' )
+'cursor goto' cursor.3 + lines keyword_start + offset
+'insertmode on'
+'text  '
+Return 0
+
+DetermineCaseOfKeyword:
+Parse Arg changecase, keyword
+If \changecase Then Return 'I'
+If keyword = upper_keyword Then Return 'U'
+If Substr( keyword, 1, 1) = Substr( upper_keyword, 1, 1 ) Then Return 'M'
+Return 'L'
+
+ChangeCaseOfKeyword: Procedure
+Parse Arg changecase, case, keywords
+Select
+   When case = 'U' Then keywords = Translate( keywords )
+   When case = 'M' Then
+      Do i = 1 To Words( keywords )
+         pos = WordIndex( keywords, i )
+         keywords = Overlay( Translate( Substr( keywords, pos, 1 ) ), keywords, pos )
+      End
+   Otherwise Nop
+end
+Return keywords
+
+Abort: Procedure
+Parse Arg msg
+'emsg' msg
+Exit 0
+
+toggle:
+'editv getf codecomp'
+If codecomp = 'on' Then codecomp = 'off'
+Else
+   Do
+      If Wordpos( parser, supported_parsers ) = 0 Then Abort( 'Code completion not supported with current language:' parser )
+      codecomp = 'on'
+   End
+'editv putf codecomp'
+'MSG Code completion expansion turned' codecomp'.'
+Return
+

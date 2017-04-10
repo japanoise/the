@@ -1,0 +1,275 @@
+*
+* This file contains the THE Language Definition for Objective C
+* It is based heavily on Kedit's KLD file format.
+*
+* Name = *OBJC
+*
+:case
+  respect
+:option
+  preprocessor #
+  function ( blank default alt 4
+:number
+  c
+:identifier
+  [a-zA-Z_\@] [a-zA-Z0-9_]
+:string
+  single backslash
+  double backslash
+:comment
+  paired /* */ nonest
+  line // any
+:header
+  line - firstnonblank
+:match
+  ( )
+  { }
+  #ifdef,#if,#ifndef #endif #else,#elif,#elseif
+:keyword
+  #define
+  #elif
+  #else
+  #endif
+  #error
+  #if
+  #ifdef
+  #ifndef
+  #import
+  #include
+  #line
+  #pragma
+  #undef
+  @end alt g
+  @implementation alt g
+  @interface alt g
+  BOOL
+  Class
+  FALSE
+  IMP
+  NIL
+  SEL
+  TRUE
+  asm
+  auto
+  bool
+  break
+  bycopy
+  byref
+  case
+  catch
+  cdecl
+  char
+  class
+  const
+  const_cast
+  continue
+  default
+  defined alt f
+  delete
+  do
+  double
+  dynamic_cast
+  else
+  enum
+  explicit
+  extern
+  false
+  float
+  for
+  friend
+  goto
+  id
+  if
+  in
+  inline
+  inout
+  int
+  long
+  mutable
+  namespace
+  new
+  nil
+  NULL
+  oneway
+  operator
+  out
+  pascal
+  private
+  protected
+  public
+  register
+  reinterpret_cast
+  return
+  self
+  short
+  signed
+  sizeof
+  static
+  static_cast
+  struct
+  super
+  switch
+  template
+  this
+  throw
+  true
+  try
+  typedef
+  typeid
+  union
+  unsigned
+  using
+  virtual
+  void
+  volatile
+  while
+:function
+  abort
+  abs
+  acos
+  asctime
+  asin
+  assert
+  atan
+  atan2
+  atexit
+  atof
+  atoi
+  atol
+  bsearch
+  calloc
+  ceil
+  clearerr
+  clock
+  cos
+  cosh
+  ctime
+  ctype
+  difftime
+  div
+  exit
+  exp
+  fabs
+  fclose
+  feof
+  ferror
+  fflush
+  fgetc
+  fgetpos
+  fgets
+  floor
+  fmod
+  fopen
+  fprintf
+  fputc
+  fputs
+  fread
+  free
+  freopen
+  frexp
+  fscanf
+  fseek
+  fsetpos
+  ftell
+  fwrite
+  getc
+  getchar
+  getenv
+  gets
+  gmtime
+  isalnum
+  isalpha
+  isascii
+  iscntrl
+  isdigit
+  isgraph
+  islower
+  isprint
+  ispunct
+  isspace
+  isupper
+  isxdigit
+  labs
+  ldexp
+  ldiv
+  localtime
+  log
+  log10
+  longjmp
+  malloc
+  memchr
+  memcmp
+  memcpy
+  memmove
+  memset
+  mktime
+  modf
+  perror
+  pow
+  printf
+  putc
+  putchar
+  puts
+  qsort
+  raise
+  rand
+  realloc
+  remove
+  rewind
+  scanf
+  setbuf
+  setjmp
+  setvbuf
+  signal
+  sin
+  sinh
+  sprintf
+  sqrt
+  srand
+  sscanf
+  strcat
+  strchr
+  strcmp
+  strcoll
+  strcpy
+  strcspn
+  strerror
+  strftime
+  strlen
+  strncat
+  strncmp
+  strncpy
+  strpbrk
+  strrchr
+  strspn
+  strstr
+  strtod
+  strtok
+  strtol
+  strtoul
+  strxfrm
+  system
+  tan
+  tanh
+  time
+  tmpfile
+  tmpnam
+  tolower
+  toupper
+  ungetc
+  va_arg
+  va_end
+  va_start
+  vfprintf
+  vprintf
+  vsprintf
+* wide character functions
+  wcslen
+  wcscpy
+  towupper
+  towlower
+  iswupper
+  iswlower
+  iswdigit
+  wmemcpy
+  wmemset

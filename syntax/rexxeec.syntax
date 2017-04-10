@@ -1,0 +1,207 @@
+* THE Function Syntax file for Rexx/EEC
+: KEYWORD LITERAL
+EECencode( Str )
+> * NAME
+> *   EECencode
+> * SYNOPSIS
+> *   encstr = EECencode( Str )
+> * FUNCTION
+> *   Encodes Str to a 7-bit string.
+> * ARGUMENTS
+> *   - Str - The raw, 8-bit string to encode.
+> * RESULT
+> *   Str uuencoded or blank if an error.
+> * SEE ALSO
+> *   EECdecode, !REXXEEC.!INTERRM
+> * SOURCE
+> *
+>...
+>str = 'This is my string.'
+>encstr = eecencode( str )
+EECdecode( EncStr )
+> * NAME
+> *   EECdecode
+> * SYNOPSIS
+> *   str = EECdecode( EncStr )
+> * FUNCTION
+> *   Decodes EncStr to an 8-bit string.
+> * ARGUMENTS
+> *   - EncStr - The encoded, 7-bit string to encode.
+> * RESULT
+> *   EncStr uudecoded or blank if an error.
+> * SEE ALSO
+> *   EECencode, !REXXEEC.!INTERRM
+> * SOURCE
+> *
+>...
+>str = 'This is my string.'
+>encstr = eecencode( str )
+>samestr = eecdecode( encstr )
+>If samestr \== str Then Say 'error encoding/decoding'
+EECencrypt( Str, Key[, Type] )
+> * NAME
+> *   EECencrypt
+> * SYNOPSIS
+> *   encstr = EECencrypt( Str, Key[, Type] )
+> * FUNCTION
+> *   Encrypts a Rexx string using the specified Key and encryption Type.
+> * ARGUMENTS
+> *   - Str  - the Rexx string to be encrypted
+> *   - Key  - the key to be used for encryption
+> *   - Type - Optional. DES, RIJNDAEL or BLOWFISH. BLOWFISH is default.
+> * RESULT
+> *   The encrypted string. If an error occurs during encryption, the return
+> *   value will be blank and an error available in the variable !REXXEEC.!ERRMSG.
+> * SEE ALSO
+> *   EECdecrypt
+> * SOURCE
+> *
+>...
+>encstr = eecencrypt( 'my secret data', 'mykey, 'DES' )
+>If encstr = '' Then Say 'Error encrypting' !REXXEEC.!INTERRM
+EECdecrypt( EncStr, Key[, Type] )
+> * NAME
+> *   EECdecrypt
+> * SYNOPSIS
+> *   str = EECdecrypt( EncStr, Key[, Type] )
+> * FUNCTION
+> *   Decrypts a Rexx string using the specified Key and encryption Type.
+> * ARGUMENTS
+> *   - EncStr - the Rexx string to be decrypted
+> *   - Key    - the key to be used for decryption
+> *   - Type   - Optional. DES, RIJNDAEL or BLOWFISH. BLOWFISH is default.
+> * RESULT
+> *   The decrypted string. If an error occurs during decryption, the return
+> *   value will be blank.
+> * SEE ALSO
+> *   EECencrypt
+> * SOURCE
+> *
+>...
+>str = eecdecrypt( '^^#((@#(', 'mykey' )
+>If str = '' Then Say 'Error decrypting' !REXXEEC.!INTERRM
+EECcompress( Str[, Type] )
+> * NAME
+> *   EECcompress
+> * SYNOPSIS
+> *   cmpstr = EECcompress( Str[, Type] )
+> * FUNCTION
+> *   Compresses Str with the algorith specified by Type.
+> * ARGUMENTS
+> *   - Str  - the Rexx string to be compressed
+> *   - Type - Optional. ZLIB. ZLIB is default.
+> * RESULT
+> *   The compressed string.
+> * SEE ALSO
+> *   EECdecompress
+> * SOURCE
+> *
+>...
+>cmpstr = eeccompress( 'my big, fat data' )
+>If cmpstr = '' Then Say 'Error compressing' !REXXEEC.!INTERRM
+EECdecompress( CmpStr[, Type] )
+> * NAME
+> *   EECdecompress
+> * SYNOPSIS
+> *   str = EECdecompress( CmpStr[, Type] )
+> * FUNCTION
+> *   Decompresses CmpStr with the algorith specified by Type.
+> * ARGUMENTS
+> *   - CmpStr - the Rexx string to be decompressed
+> *   - Type   - Optional. ZLIB. ZLIB is default.
+> * RESULT
+> *   The decompressed string.
+> * SEE ALSO
+> *   EECcompress
+> * SOURCE
+> *
+>...
+>str = eecdecompress( '*#*@', 'ZLIB' )
+>If str = '' Then Say 'Error decompressing' !REXXEEC.!INTERRM
+EECloadfuncs()
+> * NAME
+> *   EECloadfuncs
+> * SYNOPSIS
+> *   rcode = EECloadfuncs()
+> * FUNCTION
+> *   Loads all other RexxEEC external functions
+> * ARGUMENTS
+> *   None
+> * RESULT
+> *   0 in all cases
+> * SEE ALSO
+> *   EECdropfuncs
+EECdropfuncs(["UNLOAD"])
+> * NAME
+> *   EECdropfuncs
+> * SYNOPSIS
+> *   rcode = EECdropfuncs(["UNLOAD"])
+> * FUNCTION
+> *   Cleans up RexxEEC environment and optionally will drop the
+> *   external functions.
+> * ARGUMENTS
+> *   - UNLOAD - causes the external functions to be dropped.
+> * RESULT
+> *   0 in all cases
+> * SEE ALSO
+> *   EECloadfuncs
+EECvariable(Variable [,NewValue])
+> * NAME
+> *   EECvariable
+> * SYNOPSIS
+> *   rcode = EECvariable(Variable [,NewValue])
+> * FUNCTION
+> *   Get or set an internal RexxEEC variable.
+> * ARGUMENTS
+> *   - Variable - name of the variable to get or set. See NOTES for
+> *   - NewValue - the new value of "Variable", if the variable is settable
+> * RESULT
+> *   When setting a variable, then 0 if success, any other value is an error
+> *   When getting a variable, then the value of the variable is returned.
+> * NOTES
+> *   The "Variable" argument can be one of:
+> *      DEBUG (settable)
+> *         0 - no debugging
+> *         1 - all Rexx variables set by RexxEEC are displayed as they are set
+> *         2 - all RexxEEC functions are traced on entry with argument values and
+> *             on exit with the return value
+> *         4 - all internal RexxEEC functions are traced with their arguments
+> *             (really only useful for developers)
+> *         The values can be added together for a combination of the above details.
+> *      DEBUGFILE (settable)
+> *         Where any debugging output is written. By default this goes to
+> *         the system's error stream; usually 'stderr'.
+> *      CONSTANTPREFIX (settable)
+> *         The variable name prefix for all RexxEEC constants. By default this is
+> *         '!REXXEEC.!'. If you change this, it is useful to make the prefix result
+> *         in stemmed variables; this makes it far easier to EXPOSE these constants.
+> *      VERSION (readonly)
+> *         The full version details of RexxEEC in the format:
+> *         package version version_date
+> *         Where:
+> *            package      - the string 'rexxeec'
+> *            version      - package version in n.n format; eg 1.0
+> *            version_date - date package was released in DATE('N') format
+> * SOURCE
+> *
+>...
+>Say 'We are running at debug level:' EECvariable( 'DEBUG' )
+EECqueryfunction(FunctionName|ResultArray[, Option])
+> * NAME
+> *   EECQueryFunction
+> * SYNOPSIS
+> *   rcode = EECqueryfunction(FunctionName|ResultArray[, Option])
+> * FUNCTION
+> *   Populates an array of all functions supplied by this package depending
+> *   on Option
+> * ARGUMENTS
+> *   - FunctionName - the name of a function to query (no trailing period)
+> *   - ResultArray - the stem (trailing period) in which the list of functions is returned
+> *   - Option - one of 'R' (the default) for "registered" functions or 'A' for
+> *     "available" functions
+> * RESULT
+> *   0 if successful or 1 if the FunctionName is not found
+> * NOTES
+> *   To determine if a FunctionName can be executed in your code, pass
+> *   the function name as the first argument, and 'R' as the second. If the
+> *   function can be called the function returns 0, otherwise it returns 1

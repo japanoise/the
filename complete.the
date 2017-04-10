@@ -1,0 +1,324 @@
+/***********************************************************************
+ *                                                                     *
+ * Macro  complete.the   V1.3  (THE)                                   *
+ *                                                                     *
+ * Author:   Pablo Garcia-Abia                                         *
+ * Date:     14/01/98                                                  *
+ *                                                                     *
+ * Syntax:   complete alternative_command                              *
+ *                                                                     *
+ *                                                                     *
+ * Description:                                                        *
+ *                                                                     *
+ *    Macro to complete filenames in the command line, whenever the    *
+ *    first command typed is one of the following:                     *
+ *                                                                     *
+ *                    XEDIT  FFILE  FILE  MACRO     LS                 *
+ *                    THE    SSAVE  SAVE  OSREDIR   DIRECTORY          *
+ *                    EDIT   GET    PUTD  STATUS                       *
+ *                                                                     *
+ *    Otherwise, an alternative command is executed.                   *
+ *                                                                     *
+ *    When the filename is being typed in the command line, a double   *
+ *    equal sign (==) is always substituted by the whole filename      *
+ *    (without path) of the file being edited.                         *
+ *                                                                     *
+ *    A single equal sign (=) in a given field (delimitied by the      *
+ *    selected separator) is substituted by the corresponding field    *
+ *    of the filename of the file being edited.                        *
+ *                                                                     *
+ *    The separator is taken as the character preceding the equal      *
+ *    sign unless it is the first in the string. In that case, the     *
+ *    character following the '=' is taken as separator. The dot       *
+ *    '.' is used as a separator in ill cases.                         *
+ *                                                                     *
+ *    More sophisticated completion may be implemented in the future   *
+ *    for other commands, eventually.                                  *
+ *                                                                     *
+ *                                                                     *
+ * Example:                                                            *
+ *                                                                     *
+ *    To use it, define a key in the following way:                    *
+ *                                                                     *
+ *         DEFINE keyname MACRO complete alternative_command           *
+ *                                                                     *
+ *    For example:                                                     *
+ *                                                                     *
+ *         define TAB macro complete sos tabfieldf                     *
+ *                                                                     *
+ *    In this example, the TAB key will complete filenames when typed  *
+ *    IN the CMDline (after XEDIT, THE or any other allowed command).  *
+ *    Otherwise it will execute "sos tabfieldf".                       *
+ *                                                                     *
+ *                                                                     *
+ * Note:  more sophisticated completion may be implemented in the      *
+ *        future for other commands, eventually.                       *
+ *                                                                     *
+ *                                                                     *
+ * Version history:                                                    *
+ *                                                                     *
+ * 1.3 (14/01/98)  - follow up directory tree when looking for         *
+ *                   completions: UNIX ok, to be checked in OS2.       *
+ *                   Not implemented in other OS.                      *
+ *                 - FJW: OS-dependent corrections (thanks)            *
+ *                 - substitution of '=' and '=='                      *
+ * 1.2 (11/12/97)  added list of commands allowed for file completion  *
+ * 1.1 (10/12/97)  bug on ambiguities output corrected                 *
+ * 1.0 (10/12/97)  first version                                       *
+ *                                                                     *
+ * Bugs, comments and/or questions to Pablo.Garcia.Abia@cern.ch        *
+ ***********************************************************************/
+
+  Parse Arg alt_command
+
+  If translate(alt_command) == 'HELP' Then Signal HELP
+
+  "PRESERVE"
+
+  "EXTRACT /CMDLINE/CURSOR/MSGLINE/LSCREEN"
+
+  If cmdline.1 = "OFF" Then Exit
+
+  If cursor.3 = -1 & words(cmdline.3) > 0 Then Call COMPLETE
+  Else alt_command
+
+  "RESTORE"
+
+  Exit
+
+
+/* Filename completion */
+
+COMPLETE:
+
+os = version.3()      /* Credits for Franz-Josef Wirtz */
+
+Select
+   When (os == "OS2") Then Do
+      dirsep = "\"
+/*      dircmd = "ls -d" /* or "dir /B" if 'ls' is not available */ */
+      dircmd = "ls -dp"  /* slash after dir name ??? */
+   End
+
+   When os == "WIN32" | os == "WIN64" Then Do
+      dirsep = "\"
+      dircmd = "dir /B"
+   End
+
+   Otherwise Do
+      dirsep = "/"
+      dircmd = "ls -dp"
+   End
+End                   /* Credits for Franz-Josef Wirtz (END) */
+
+ori = delword(cmdline.3,words(cmdline.3))
+cmd = translate(word(cmdline.3,1))
+
+If words(cmdline.3) > 1 Then str = word(cmdline.3,words(cmdline.3))
+Else                         str = ""
+
+
+/* Deal with equals in input string */
+
+fn   = filename.1()
+if (os == "OS2") Then
+   eqeq = pos( '==', str)     /* '==' is always the whole filename */
+else
+   eqeq = index(str,'==')     /* '==' is always the whole filename */
+
+If eqeq > 0 Then Do
+   str = delstr(str,eqeq,2)
+   str = insert(fn,str,eqeq-1)
+   'CMSG' ori||str
+End
+
+if (os == "OS2") Then
+   equ = pos( '=', str)
+else
+   equ = index(str,'=')
+
+If equ > 0 Then Do
+
+/* get separator: character before the '=' sign, or after it if '=' is the
+                  first char in str. If not char, dot '.' is assumed */
+
+    If      equ == 1           Then eq_sep = substr(str,equ+1,1)
+    Else                            eq_sep = substr(str,equ-1,1)
+
+    If eq_sep = " " Then eq_sep = "."
+
+/* split filename according to 'eq_sep' */
+
+    ndot = 0
+    nstr = 1
+    fn.  = ''
+
+    If substr(fn,1,1) == eq_sep Then dot = pos(eq_sep,fn,2)
+    Else                             dot = pos(eq_sep,fn)
+
+    Do While dot > 0
+       ndot    = ndot+1
+       fn.ndot = substr(fn,nstr,dot-nstr)
+       nstr    = dot+1
+       dot     = pos(eq_sep,fn,nstr)
+    End
+
+    ndot    = ndot+1
+    fn.ndot = substr(fn,nstr)
+
+/* substitute '=' by its counterparts */
+
+    nstr = 1
+    nequ = 0
+    str. = ''
+
+    If substr(str,1,1) == eq_sep Then dot = pos(eq_sep,str,2)
+    Else                              dot = pos(eq_sep,str)
+
+    Do While dot > 0
+       nequ     = nequ+1
+
+       If substr(str,nstr,dot-nstr) == '=' Then Do
+          str = delstr(str,nstr,1)
+          str = insert(fn.nequ,str,nstr-1)
+       End
+
+       nstr     = dot+1
+       dot      = pos(eq_sep,str,nstr)
+    End
+
+    If substr(str,nstr) == '=' Then Do
+       nequ     = nequ+1
+       str = delstr(str,nstr,1)
+       str = insert(fn.nequ,str,nstr-1)
+    End
+
+   'CMSG' ori||str
+End
+
+
+/* Match one of these commands */
+
+list_cmd = "XEDIT THE EDIT FFILE FILE SAVE SSAVE LS DIRECTORY GET PUTD MACRO OSREDIR STATUS"
+list_abb = "1     3   1    2     4    4    2     2  3         3   3    5     3       4     "
+
+match = 0
+
+Do i=1 To words(list_cmd)
+   If 'ABBREV'(word(list_cmd,i),cmd,word(list_abb,i)) Then Do
+     match = 1
+     Leave
+   End
+End
+
+/* no command matched */
+
+If match <> 1 Then Do
+      alt_command
+      return
+End
+
+/* one command matched */
+
+If os <> "OS2" Then stdin.0 = 0
+slash = lastpos(dirsep,str)
+
+x = run_os(dircmd str"*", ,"stdout.", "stderr.")
+
+len_stdout = length(stdout.1)
+
+If substr(stdout.1,len_stdout) == dirsep Then ,
+     lout = lastpos(dirsep,substr(stdout.1,1,len_stdout-1))
+Else lout = lastpos(dirsep,stdout.1)
+
+/* No ambiguities */
+
+If stderr.0 > 0 Then EMSG stderr.1
+Else If stdout.0 = 1 Then
+      If slash > 0 Then 'CMSG' ori||substr(str,1,slash)||substr(stdout.1,lout+1)
+      Else              'CMSG' ori||stdout.1
+Else Do
+
+
+/* List ambiguities */
+
+  trunc = 1
+  Do itr=5 By 5 Until trunc = 0 | itr > lscreen.1-10
+
+     nmax   = min(itr,lscreen.1-10)
+     ncols  = format(stdout.0/nmax-0.5,,0)+1
+     nlines = min(nmax,stdout.0)
+     long.  = 0
+     short  = 9999
+     colu   = 0
+     line   = 0
+     line.  = ""
+     width  = lscreen.2
+
+     "set msgline ON 2" nmax "OVERLAY"
+
+     Do i=1 To stdout.0
+        line = line+1
+        If line > nmax Then Do ; line = 1 ; colu = colu+1 ; End
+
+        len_stdout = length(stdout.i)
+
+        If substr(stdout.i,len_stdout) == dirsep Then ,
+             last = lastpos(dirsep,substr(stdout.i,1,len_stdout-1))+1
+        Else last = lastpos(dirsep,stdout.i)+1
+
+        new.i = substr(stdout.i,last)
+
+        short     = min(short,     length(new.i))
+        long.colu = max(long.colu, length(new.i))
+
+     End
+
+     colu = 0
+     line = 0
+     Do i=1 To stdout.0
+        line = line+1
+        If line > nmax Then Do ; line = 1 ; colu = colu+1 ; End
+        line.line = line.line||substr(new.i,1,long.colu+4)
+     End
+
+     trunc = 0
+     Do i=1 To nlines
+        If length(line.i) > width Then trunc = trunc+1
+     End
+
+  End
+
+  Do i=1 To nlines
+     MSG substr(line.i,1,width)
+  End
+
+  If trunc > 0 Then Do
+     "set msgline ON 2" nmax+2 "OVERLAY"
+      MSG
+      MSG "Too many files to be displayed:" trunc "lines truncated..."
+  End
+
+/* Partial Completion (up to ambiguity) */
+
+  If slash > 0 Then len = length(substr(str,slash+1))
+  Else len = length(str)
+
+  Do j=len+1 To short
+    char = substr(new.1,j,1)
+    inall = 1
+    Do k=2 To stdout.0
+      If substr(new.k,j,1) <> char Then Do
+         inall = 0
+         Leave
+      End
+    End
+    If inall = 1 Then
+      If slash > 0 Then 'CMSG' ori||substr(str,1,slash)||substr(new.1,1,j)
+      Else              'CMSG' ori||substr(new.1,1,j)
+    Else Leave
+  End
+
+End
+
+return

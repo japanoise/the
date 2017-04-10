@@ -1,0 +1,110 @@
+                     The Hessling Editor
+
+               Installation Notes for Un*x Port
+               --------------------------------
+
+Please read ALL of these notes before building THE!
+
+Installing THE from source
+==========================
+To install THE, you first need to configure it.  This is done by
+executing the configure script provided in this archive.  Because
+THE can be configured to run with different Curses libraries and
+with different Rexx interpreters, there are quite a few options
+available when configuring.  To see these options, run:
+
+configure --help
+
+If you are interested in building different versions of THE on the
+one platform; like the X11 version and a text mode version, then you can
+do something like this.
+
+To build a text-mode version of THE with "standard" curses and Regina:
+---------------------------------------------------------------------
+
+mkdir curses
+cd curses
+../configure --with-rexx=regina
+make the
+
+To build the X11 version of THE with PDCurses (aka XCurses) and REXX/imc:
+------------------------------------------------------------------------
+*** If building XCurses from source, you will need to configure XCurses with the following
+*** switches: --enable-widec --enable-force-utf8
+*** otherwise you will get rubbish when pasting text into THE from another application.
+
+mkdir xcurses
+cd xcurses
+../configure --with-xcurses --with-cursesincdir=somewhere --with-curseslibdir=somewhere --with-rexx=rexximc
+make the
+
+The configure script looks in some common places for all the libraries (both
+curses and Rexx).  These are defined in the configure script. Some of the
+common directories are $HOME/include, /usr/local/include for header files
+and $HOME/lib and /usr/local/lib for libraries.  There are several others;
+see 'configure' for the full list.
+If you build THE with the same Rexx interpreter, you can set REXXINCDIR and
+REXXLIBDIR environment variables to the include and lib directories
+respectively.
+These switches --with-rexxincdir and --with-rexxlibdir override the values
+set in REXXINCDIR and REXXLIBDIR.
+If you build THE with the same curses library, you can set CURSESINCDIR and
+CURSESLIBDIR environment variables to the include and lib directories
+respectively.
+These switches --with-cursesincdir and --with-curseslibdir override the values
+set in CURSESINCDIR and CURSESLIBDIR.
+
+Once you have THE compiled, it can then be installed.  By default, the
+THE executable will be installed into /usr/bin, while the supplied
+macros will be installed into /usr/share/THE.  The base path "/usr"
+can be changed by adding the --prefix=path (where path is the base path)
+to the configure command.
+eg. to install THE into /opt/bin and /opt/share/THE, configure --prefix=/opt ...
+
+
+
+Installing THE from RPMs
+========================
+If you have a reasonably current version of Linux, it might be simpler to install THE
+and its associated dependencies from RPMs rather than building from source.
+
+THE is available in two formats; a version that runs within a terminal emulator like
+xterm, and uses the text-mode ncurses package for keyboard and display, or as a native
+X11 application. Both can be installed on the one machine at the same time. The binary
+for the native X11 application is "xthe" and the binary for the ncurses application
+is "nthe". THE can use Regina, ooRexx or REXX-imc as its Rexx interpreter. The instructions
+below assume you are installing Regina.
+
+Installation of THE as a native X11 application
+-----------------------------------------------
+Download the following RPMs:
+o http://downloads.sourceforge.net/hessling-editor/THE-X11-3.2-1.i386.rpm
+o http://downloads.sourceforge.net/pdcurses/PDCurses-2.8-1.i386.rpm
+o http://downloads.sourceforge.net/rexxtrans/RexxTrans-1.8-1.i386.rpm
+o http://downloads.sourceforge.net/regina-rexx/Regina-REXX-3.3-1.i386.rpm
+
+Install the RPMs as root in the following order:
+o rpm -ivh PDCurses-2.8-1.i386.rpm
+o rpm -ivh RexxTrans-1.8-1.i386.rpm
+o rpm -ivh Regina-REXX-3.3-1.i386.rpm
+o rpm -ivh THE-X11-3.2-1.i386.rpm
+  You may need to add --nodeps switch when installing THE;
+  ie. rpm -ivh --nodeps THE-X11-3.2-1.i386.rpm
+
+You should now be able to execute "xthe".
+
+Installation of THE as an ncurses application
+---------------------------------------------
+Download the following RPMs:
+o http://downloads.sourceforge.net/hessling-editor/THE-ncurses-3.2-1.i386.rpm
+o http://downloads.sourceforge.net/rexxtrans/RexxTrans-1.8-1.i386.rpm
+o http://downloads.sourceforge.net/regina-rexx/Regina-REXX-3.3-1.i386.rpm
+
+Install the RPMs as root in the following order:
+o rpm -ivh RexxTrans-1.8-1.i386.rpm
+o rpm -ivh Regina-REXX-3.3-1.i386.rpm
+o rpm -ivh THE-ncurses-3.2-1.i386.rpm
+  You may need to add --nodeps switch when installing THE;
+  ie. rpm -ivh --nodeps THE-ncurses-3.2-1.i386.rpm
+
+You should now be able to execute "nthe" from within a terminal emulator.
